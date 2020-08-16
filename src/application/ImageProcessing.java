@@ -18,72 +18,50 @@ public class ImageProcessing {
 	 static BufferedImage img3 = null;
      static File f = null; 
      static boolean flag = false;
-     static BufferedImage img2 = null, actualImage = null;
-     static int lastIndexOnGreen = 0, lastIndexOnRed = 0, lastIndexOnBlue = 0;
+     static BufferedImage updatedImage = null, actualImage = null;
+     static int lastValueOnGreen = 0, lastValueOnRed = 0, lastValueOnBlue = 0;
      static int tempGreen = 0, tempRed = 0, tempBlue = 0;
      static boolean isFirst = true;
      static String imagePath = null;
-     static int[][] baseGr = fun(2);
-     static int[][] baseRed = fun(1);
-     static int[][] baseBlue = fun(3);
-    // static BufferedImage bi = getBufferedImage();
-     
-     static int width; 
-	   static int height; 
-	 static String watermark = null;
-   /* public static BufferedImage getBufferedImage() {
-    //	 BufferedImage img = null;
-    	 try { 
-		    f = new File(FileMenu.imagePath);
-			 img= ImageIO.read(f); 	
-    	 }catch(Exception e) {
-		    System.out.println(e);
-		 }
-    	 return img;
-    	 
-     }*/
-     public static int[][] fun(int index) {
+     static int[][] baseRed = returBasePixelValues(1);
+     static int[][] baseGr = returBasePixelValues(2);
+     static int[][] baseBlue = returBasePixelValues(3);
+     static String watermark = null;
+     /*
+      * returnBasePixelValues - it returns the base value of a color(red, green, blue) in every pixel of an image
+      */
+     public static int[][] returBasePixelValues(int colorOption) {
     	 try { 
  		        f = new File(FileMenu.imagePath);
  				img = ImageIO.read(f); 	
  		        }catch(Exception e) {
  		        	System.out.println(e);
  		         }
-    	 int[][] baseGr = new int[img.getHeight()][img.getWidth()];
-    	 int[][] baseRed = new int[img.getHeight()][img.getWidth()];
-    	 int[][] baseBlue = new int[img.getHeight()][img.getWidth()];
+    	 int[][] basePixelValues = new int[img.getHeight()][img.getWidth()];
     	 for(int y = 0; y < img.getHeight(); y++) { 
 				for(int x = 0; x < img.getWidth(); x++) { 
 					int p = img.getRGB(x,y); 
-
-					//int a = (p>>24)&0xff; 
-					int R = (p>>16)&0xff; 
 					
-					int G = (p>>8)&0xff; 
-					int B = p&0xff; 
-					if(index == 2) {
-						baseGr[y][x] = G;
+					if(colorOption == 2) {
+						int G = (p>>8)&0xff; 
+						basePixelValues[y][x] = G;
 					}
-					else if(index == 1) {
-						baseRed[y][x] = R;
+					else if(colorOption == 1) {
+						int R = (p>>16)&0xff;
+						basePixelValues[y][x] = R;
 					}
-					else if(index == 3){
-						baseBlue[y][x] = B;
+					else if(colorOption == 3){
+						int B = p&0xff; 
+						basePixelValues[y][x] = B;
 					}
 				}
     	 }
-    	 if(index==1) {
-    		 return baseRed;
-    	 }
-    	 else if(index==2) {
-    		 return baseGr;
-    	 }
-    	 else if(index==3){
-    		 return baseBlue;
-    	 }
-    	 return null;
+    	 return basePixelValues;
      }
-     public static void changeRGB(int index, int index2) {
+     /*
+      * changeRGB(int lastColorValue, colorOption) - changes the red, green, blue values of every pixel of an image by % of these values
+      */
+     public static void changeRGB(int lastColorValue, int colorOption) {
  			if(!flag) {
  				try { 
  		        	f = new File(FileMenu.imagePath);
@@ -94,7 +72,7 @@ public class ImageProcessing {
  		         }
  			}
  			else {
- 				img = img2;
+ 				img = updatedImage;
  			}
  	        if(img != null) {
  	        	for(int y = 0; y < img.getHeight(); y++) { 
@@ -106,12 +84,12 @@ public class ImageProcessing {
  						
  						int G = (p>>8)&0xff; 
  						int B = p&0xff; 
- 						
- 						if(index2 == 1) {
- 							if(index > lastIndexOnRed) {
+ 						//CHANGE RED
+ 						if(colorOption == 1) {
+ 							if(lastColorValue > lastValueOnRed) {
 								 if(isFirst) {
-									 tempRed = index;
-									 double newRed = R*(index)/50;
+									 tempRed = lastColorValue;
+									 double newRed = R*(lastColorValue)/50;
 									 if(R+newRed > 255) {
 										 R = 255;
 									 }
@@ -120,7 +98,7 @@ public class ImageProcessing {
 									 }
 								 }
 								 else {
-									 double newRed = baseRed[y][x]*(index-lastIndexOnRed)/50;
+									 double newRed = baseRed[y][x]*(lastColorValue-lastValueOnRed)/50;
 									 if(R+newRed > 255) {
 										 R = 255;
 									 }
@@ -129,8 +107,8 @@ public class ImageProcessing {
 									 }
 								 }
 							}	
-							else if(index < lastIndexOnRed) {
-								double newRed = baseRed[y][x]*(lastIndexOnRed-index)/50;
+							else if(lastColorValue < lastValueOnRed) {
+								double newRed = baseRed[y][x]*(lastValueOnRed-lastColorValue)/50;
 								if(R-newRed < baseRed[y][x]) {
 									R = (int)baseRed[y][x];
 								}
@@ -141,11 +119,12 @@ public class ImageProcessing {
 							 p = (a<<24) | (R<<16) | (G<<8) | B; 
 				                img.setRGB(x, y, p);           
  						}
- 						else if(index2 == 2) {
- 							if(index > lastIndexOnGreen) {
+ 						//CHANGE GREEN
+ 						else if(colorOption == 2) {
+ 							if(lastColorValue > lastValueOnGreen) {
  								 if(isFirst) {
- 									 tempGreen = index;
- 									 double newGreen = G*(index)/50;
+ 									 tempGreen = lastColorValue;
+ 									 double newGreen = G*(lastColorValue)/50;
  									 if(G+newGreen > 255) {
  										 G = 255;
  									 }
@@ -154,7 +133,7 @@ public class ImageProcessing {
  									 }
  								 }
  								 else {
- 									 double newGreen = baseGr[y][x]*(index-lastIndexOnGreen)/50;
+ 									 double newGreen = baseGr[y][x]*(lastColorValue-lastValueOnGreen)/50;
  									 if(G+newGreen > 255) {
  										 G = 255;
  									 }
@@ -163,8 +142,8 @@ public class ImageProcessing {
  									 }
  								 }
  							}	
- 							else if(index < lastIndexOnGreen) {
- 								double newGreen = baseGr[y][x]*(lastIndexOnGreen-index)/50;
+ 							else if(lastColorValue < lastValueOnGreen) {
+ 								double newGreen = baseGr[y][x]*(lastValueOnGreen-lastColorValue)/50;
  								if(G-newGreen < baseGr[y][x]) {
  									G = (int)baseGr[y][x];
  								}
@@ -175,11 +154,12 @@ public class ImageProcessing {
  							 p = (a<<24) | (R<<16) | (G<<8) | B; 
  				                img.setRGB(x, y, p); 
  						}
- 						else if(index2 == 3) {
- 								if(index > lastIndexOnBlue) {
+ 						//CHANGE BLUE
+ 						else if(colorOption == 3) {
+ 								if(lastColorValue > lastValueOnBlue) {
  									if(isFirst) {
- 										tempBlue = index;
- 										double newBlue = B*(index)/50;
+ 										tempBlue = lastColorValue;
+ 										double newBlue = B*(lastColorValue)/50;
  										if(B+newBlue > 255) {
  											B = 255;
  										}
@@ -188,7 +168,7 @@ public class ImageProcessing {
 									}
 								}
 								else {
-									double newBlue = baseBlue[y][x]*(index-lastIndexOnBlue)/50;
+									double newBlue = baseBlue[y][x]*(lastColorValue-lastValueOnBlue)/50;
 									if(B+newBlue > 255) {
 										B = 255;
 									}
@@ -197,8 +177,8 @@ public class ImageProcessing {
 									}
 								}
 							}
-							else if(index < lastIndexOnBlue) {
-								double newBlue = baseBlue[y][x]*(lastIndexOnBlue-index)/50;
+							else if(lastColorValue < lastValueOnBlue) {
+								double newBlue = baseBlue[y][x]*(lastValueOnBlue-lastColorValue)/50;
 								if(B-newBlue < baseBlue[y][x]) {
 									B = (int)baseBlue[y][x];
 								}
@@ -212,25 +192,25 @@ public class ImageProcessing {
  					}
  	        	}
  	        	if(!isFirst) {
- 	        		if(index2 == 2) {
- 	        			tempGreen+=index-lastIndexOnGreen;
- 	        			lastIndexOnGreen = index;
+ 	        		if(colorOption == 2) {
+ 	        			tempGreen+=lastColorValue-lastValueOnGreen;
+ 	        			lastValueOnGreen = lastColorValue;
  	        		}
- 	        		else if(index2 == 1) {
- 	        			tempRed+=index-lastIndexOnRed;
- 	        			lastIndexOnRed = index;
+ 	        		else if(colorOption == 1) {
+ 	        			tempRed+=lastColorValue-lastValueOnRed;
+ 	        			lastValueOnRed = lastColorValue;
  	        		}
- 	        		else if(index2 == 3){
- 	        			tempBlue+=index-lastIndexOnBlue;
- 	        			lastIndexOnBlue = index;
+ 	        		else if(colorOption == 3){
+ 	        			tempBlue+=lastColorValue-lastValueOnBlue;
+ 	        			lastValueOnBlue = lastColorValue;
  	        		}
  	        	}
  	        	
  	        }
  	        Image image = SwingFXUtils.toFXImage(img, null);
  			FileMenu.myImageView.setImage(image);
- 			img2 = img;
- 			actualImage = img2;
+ 			updatedImage = img;
+ 			actualImage = updatedImage;
  			flag = true;
  			isFirst = false;
  	 }
@@ -238,8 +218,8 @@ public class ImageProcessing {
 		try {
 			f = new File(FileMenu.imagePath);
 			img = ImageIO.read(f);
-			//imagePath = f.getAbsolutePath();
 		}catch(Exception e) {
+			System.out.println(e);
 		}
 		if(img != null) {
 			for(int y = 0; y < img.getHeight(); y++) { 
@@ -282,14 +262,12 @@ public class ImageProcessing {
 			//Override Image
 			Image image = SwingFXUtils.toFXImage(img, null);
 			FileMenu.myImageView.setImage(image);
-		
 			actualImage = img;
 		}
 	}
 	
 	public static void convertToNegative() {
 			if(!flag){
-			        // read image 
 			        try
 			        { 
 			        	f = new File(FileMenu.imagePath);
@@ -300,7 +278,7 @@ public class ImageProcessing {
 			        }
 			}
 			else {
-				img = img2;
+				img = updatedImage;
 			}
 		      if(img != null) {
 		        for (int y = 0; y < img.getHeight(); y++)  { 
@@ -324,21 +302,18 @@ public class ImageProcessing {
 		        // write image 
 	        	Image image = SwingFXUtils.toFXImage(img, null);
 				FileMenu.myImageView.setImage(image);
-				img2 = img;
-				actualImage = img2;
+				updatedImage = img;
+				actualImage = updatedImage;
 	      }
 	  }
-	
-	public static double func(double G,double per) {
-		return G*100/(100+per);
-	}
-	
+	/*
+	 *  brightnessEnhancement(int alpha, int beta) - changes the brightness of an image
+	 */
 	public static void brightnessEnhancement(int alpha, int beta) {
 		 System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 		 if(flag == false) {
 			 try
-		        { 
-					
+		        { 	
 		        	f = new File(FileMenu.imagePath);
 					img = ImageIO.read(f); 
 					imagePath = f.getAbsolutePath();
@@ -347,7 +322,7 @@ public class ImageProcessing {
 		        } 
 		 	}
 		 else {
-		 	img = img2;
+		 	img = updatedImage;
 		 }
 		 try {
 			 Mat source = null;
@@ -355,26 +330,23 @@ public class ImageProcessing {
 				  source = Imgcodecs.imread(imagePath, Imgcodecs.IMREAD_COLOR);
 			 }
 			 else {
-				 Image image =  SwingFXUtils.toFXImage(img2, null);
+				 Image image =  SwingFXUtils.toFXImage(updatedImage, null);
 				 source = HelperMethods.imageToMat(image,1);
 			 }
-			// System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 			 Mat destination = new Mat(source.rows(), source.cols(), source.type());
 			 source.convertTo(destination, -5, alpha, beta); 
 			 MatOfByte byteMat = new MatOfByte();
 			 Imgcodecs.imencode(".bmp", destination, byteMat);
 			 Image result = new Image(new ByteArrayInputStream(byteMat.toArray()));
 			 FileMenu.myImageView.setImage(result);
-			 img2 = img;
-				actualImage = img2;
+			 updatedImage = img;
+			 actualImage = updatedImage;
 		 }
 		 catch(Exception e) { 
-	        } 
-	 	
-		
-       
+			 System.out.println(e);
+	       } 
 	}
-	
+	//removeBrightness() - remove brightness effect
 	public static void removeBrightness() {
 		Image image =  SwingFXUtils.toFXImage(img, null);
 		FileMenu.myImageView.setImage(image);
@@ -382,7 +354,6 @@ public class ImageProcessing {
 	/*
 	 * Converts an object of type "image" into one of type "Mat"(matrix - openCv property).
 	 */
-	
 	public static void contrastEnchancement() {
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME ); 
 		 if(flag == false) {
@@ -397,7 +368,7 @@ public class ImageProcessing {
 		        } 
 		 	}
 		 else {
-		 	img = img2;
+		 	img = updatedImage;
 		 }
 		 try{ 
 	            Mat source = null;
@@ -406,29 +377,24 @@ public class ImageProcessing {
 	                           Imgcodecs.IMREAD_GRAYSCALE); 
 	            }
 	            else {
-					 Image image =  SwingFXUtils.toFXImage(img2, null);
+					 Image image =  SwingFXUtils.toFXImage(updatedImage, null);
 					 source = HelperMethods.imageToMat(image,2);
 					// source
 				 }
 	            Mat destination = new Mat(source.rows(), 
 	                               source.cols(), source.type());
 	            Imgproc.equalizeHist(source, destination);
-	            //Imgcodecs.imwrite("H:\\output.jpg", destination); 
-	           MatOfByte byteMat = new MatOfByte();
-				 Imgcodecs.imencode(".bmp", destination, byteMat);
-				 Image result = new Image(new ByteArrayInputStream(byteMat.toArray()));
-				 
-				 FileMenu.myImageView.setImage(result);
-				 img2 = img;
-					actualImage = img;
+	            MatOfByte byteMat = new MatOfByte();
+				Imgcodecs.imencode(".bmp", destination, byteMat);
+				Image result = new Image(new ByteArrayInputStream(byteMat.toArray())); 
+				FileMenu.myImageView.setImage(result);
+				updatedImage = img;
+				actualImage = updatedImage;
 	        } 
 	        catch (Exception e) 
 	        { 
-	            System.out.println("error: " + e.getMessage()); 
+	            System.out.println(e); 
 	        } 
-	     
-	
-	
 	}
 	public static void convertToRed() {
 		if(!flag) { 
@@ -439,11 +405,11 @@ public class ImageProcessing {
 					imagePath = f.getAbsolutePath();
 		        } 
 		        catch(Exception e) { 
+		        	System.out.println(e);
 		        } 
 		}
-		
 		else {
-			img = img2;
+			img = updatedImage;
 		}
 		      if(img != null) {
 		    	  for (int y = 0; y < img.getHeight(); y++) { 
@@ -464,10 +430,9 @@ public class ImageProcessing {
 		        // write image 
 	        	Image image = SwingFXUtils.toFXImage(img, null);
 				FileMenu.myImageView.setImage(image);
-				img2 = img;
-				actualImage = img2;
+				updatedImage = img;
+				actualImage = updatedImage;
 	      }
-		
 	}
 	public static void convertToGreen() {
 		if(!flag) {
@@ -478,10 +443,11 @@ public class ImageProcessing {
 					imagePath = f.getAbsolutePath();
 		        } 
 		        catch(Exception e) { 
+		        	System.out.println(e);
 		        } 
 		}
 		else {
-			img = img2;
+			img = updatedImage;
 		}
 		      if(img != null) {
 		    	  for (int y = 0; y < img.getHeight(); y++) { 
@@ -492,8 +458,8 @@ public class ImageProcessing {
 		                  int g = (p>>16)&0xff; 
 		    
 		                  // set new RGB 
-		                  // keeping the r value same as in original 
-		                  // image and setting g and b as 0. 
+		                  // keeping the g value same as in original 
+		                  // image and setting r and b as 0. 
 		                  p = (a<<24) | (0<<16) | (g<<8) | 0; 
 		    
 		                  img.setRGB(x, y, p); 
@@ -502,8 +468,8 @@ public class ImageProcessing {
 		        // write image 
 	        	Image image = SwingFXUtils.toFXImage(img, null);
 				FileMenu.myImageView.setImage(image);
-				img2 = img;
-				actualImage = img2;
+				updatedImage = img;
+				actualImage = updatedImage;
 	      }
 	}
 	public static void convertToBlue() {
@@ -518,7 +484,7 @@ public class ImageProcessing {
 		        } 
 		}
 		else {
-			img = img2;
+			img = updatedImage;
 		}
 		      if(img != null) {
 		    	  for (int y = 0; y < img.getHeight(); y++) { 
@@ -529,8 +495,8 @@ public class ImageProcessing {
 		                  int b = (p>>16)&0xff; 
 		    
 		                  // set new RGB 
-		                  // keeping the r value same as in original 
-		                  // image and setting g and b as 0. 
+		                  // keeping the b value same as in original 
+		                  // image and setting r and g as 0. 
 		                  p = (a<<24) | (0<<16) | (0<<8) | b; 
 		    
 		                  img.setRGB(x, y, p); 
@@ -539,12 +505,12 @@ public class ImageProcessing {
 		        // write image 
 	        	Image image = SwingFXUtils.toFXImage(img, null);
 				FileMenu.myImageView.setImage(image);
-				img2 = img;
-				actualImage = img2;
+				updatedImage = img;
+				actualImage = updatedImage;
 	      }
 	}
 	static boolean flag2 = true;
-	public static void watermaking() {
+	public static void watermarking() {
 		if(flag2) {
 			img3 = img;
 		}
@@ -556,10 +522,11 @@ public class ImageProcessing {
 					imagePath = f.getAbsolutePath();
 		        } 
 		        catch(Exception e) { 
+		        	System.out.println(e);
 		        } 
 		}
 		else {
-			img = img2;
+			img = updatedImage;
 		}
 		 if(img != null) {
 			 BufferedImage temp = new BufferedImage(img.getWidth(), 
@@ -591,20 +558,11 @@ public class ImageProcessing {
 			flag = true;
 			flag2 = false;
 			actualImage = temp;
-			img2 = temp;
+			updatedImage = actualImage;
 		 }
 	}
 	public static void reset() {
-		/* try
-	        { 
-	        	f = new File(FileMenu.imagePath);
-				img = ImageIO.read(f); 
-				//imagePath = f.getAbsolutePath();
-	        } 
-	        catch(Exception e) { 
-	        } */
 		BufferedImage bufferedImage = null;
-		//String path = FileMenu.file.getAbsolutePath();
 		MainClass.red.setValue(0);
 		MainClass.green.setValue(0);
 		MainClass.blue.setValue(0);
@@ -612,16 +570,16 @@ public class ImageProcessing {
 		ImageProcessing.convertToRed();
 		ImageProcessing.convertToGreen();
 		try {
-		 bufferedImage = ImageIO.read(FileMenu.file);
-		 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-		 FileMenu.myImageView.setImage(image);
-		 FileMenu.myImageView.setFitHeight(500);
-		 FileMenu.myImageView.setFitWidth(800);
+			bufferedImage = ImageIO.read(FileMenu.file);
+			Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+			FileMenu.myImageView.setImage(image);
+			FileMenu.myImageView.setFitHeight(500);
+			FileMenu.myImageView.setFitWidth(800);
 		}
-		catch(Exception e) {}
-		/*Image image =  SwingFXUtils.toFXImage(img, null);
-		FileMenu.myImageView.setImage(image);*/
-		img2 = bufferedImage;
-		actualImage = bufferedImage;
+		catch(Exception e) {
+			System.out.println(e);
+		}
+		updatedImage = bufferedImage;
+		actualImage = updatedImage;
 	}
 }

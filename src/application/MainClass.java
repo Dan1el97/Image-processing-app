@@ -132,10 +132,10 @@ public class MainClass extends Application{
 		MenuItem exit = new MenuItem("Exit");
 		exit.setOnAction(e -> closeApplication());
 		fileMenu.getItems().add(exit);
-		mainWindow.setOnCloseRequest(e -> {
+	/*	mainWindow.setOnCloseRequest(e -> {
 			e.consume();
 			closeApplication();
-		});
+		});*/
 		/*
 		 * Menu bar containing the file menu
 		 */
@@ -259,6 +259,7 @@ public class MainClass extends Application{
 		red.setValue(0);
 		red.setMinHeight(20);
 		red.setMinWidth(600);  
+		red.setStyle("-fx-border-color: black;");
 		red.setOnMouseClicked(e-> ImageProcessing.changeRGB	((int)red.getValue(),1));
 		//---------
 	    green = new ScrollBar();
@@ -268,6 +269,7 @@ public class MainClass extends Application{
 		green.setValue(0);
 		green.setMinHeight(20);
 		green.setMinWidth(600);
+		green.setStyle("-fx-border-color: black;");
 		green.setOnMouseClicked(e-> ImageProcessing.changeRGB((int)green.getValue(),2));
 		//---------
 		blue = new ScrollBar();
@@ -277,6 +279,7 @@ public class MainClass extends Application{
 		blue.setValue(0);
 		blue.setMinHeight(20);
 		blue.setMinWidth(600);
+		blue.setStyle("-fx-border-color: black;");
 		blue.setOnMouseClicked(e-> ImageProcessing.changeRGB((int)blue.getValue(),3));
 		
 		Image RGBImage = new Image(getClass().getResourceAsStream("\\Images\\RGBIcon.png"));
@@ -352,7 +355,7 @@ public class MainClass extends Application{
 		inputWatermark.setOnAction(e->{
 			if(inputWatermark.getText() != ImageProcessing.watermark) {
 				ImageProcessing.watermark = inputWatermark.getText();
-				ImageProcessing.watermaking();
+				ImageProcessing.watermarking();
 			}
 		});
 		watermarkLayout.getChildren().addAll(inputWatermark);
@@ -717,6 +720,10 @@ public class MainClass extends Application{
 		layout.getChildren().addAll(picContainer, RGBLayout, RGBButtons,BrLayout,BrButtons, WMLayout, WMButtons);
 		layout.setTop(menuBar);
 		layout.setRight(pane);
+		/*String i = MainClass.class.getResource("mainWindowBackground.png").toExternalForm();
+		layout.setStyle("-fx-background-image: url('" + i + "'); " +
+		           "-fx-background-position: center center; " +
+		           "-fx-background-repeat: stretch;");*/
 		
 		//Scene
 		scene = new Scene(layout, 1200, 800);
