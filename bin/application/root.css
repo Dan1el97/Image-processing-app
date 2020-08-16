@@ -1,0 +1,76 @@
+#pane{
+    -fx-background-image: url("https://i.pinimg.com/originals/0c/c6/fd/0cc6fd8ab4a3da0256fa115de7823d38.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: 1200 800;
+    -fx-background-position: center center;
+    -fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0); 
+}
+
+
+.pane
+{
+	-fx-effect:dropshadow(one-pass-box,black,12,0.0,6,6);  
+    -fx-border-radius:40; 
+}
+  
+
+.button  
+{  
+    -fx-effect:dropshadow(one-pass-box,black,12,0.1,6,-6);  
+       
+}
+#menuButton .button{
+	-fx-effect:dropshadow(one-pass-box,black,12,0.1,6,-6); 
+}
+
+.track-background{
+	-fx-background-color:#ff0000;
+}
+#green .track-background{
+	-fx-background-color:#00ff00;
+}
+
+#blue .track-background{
+	-fx-background-color:#0000ff;
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color :transparent;
+    -fx-border-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-border-radius :2.0em;
+}
+
+
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.7em;
+    -fx-padding :0.0 0.0 10.0 0.0;
+
+}
+
+
+
+ .scroll-bar .increment-arrow,
+ .scroll-bar .decrement-arrow{
+    -fx-shape : " ";    
+    -fx-padding :0.8em 0.0;
+}
+
+ 
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color :derive(black,90.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color :derive(#4D4C4F,10.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
