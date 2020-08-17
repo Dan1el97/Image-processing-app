@@ -548,8 +548,15 @@ public class ImageProcessing {
 	        else {
 	        	graphics.setColor(new Color(0, 0, 255, 100)); 
 	        }
-	        graphics.drawString(watermark, img.getWidth()/5, 
-	                                   img.getHeight()/3); 
+	        if(MainClass.placementOption == 1) {
+	        	graphics.drawString(watermark, img.getWidth()/5, 
+                        img.getHeight()/3); 
+	        }
+	        else {
+	        	graphics.drawString(watermark, img.getWidth()/5, 
+                       (int) (img.getHeight()/1.3)); 
+	        }
+	        
 	  
 	        // releases any system resources that it is using 
 	        graphics.dispose(); 

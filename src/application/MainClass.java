@@ -42,6 +42,8 @@ public class MainClass extends Application{
 	static Text wmPlacement;
 	static int colorOption = 0;
 	static int placementOption = 0;
+	//static int placementOption2 = 0;
+    static int watermarkOption = 0;
 	static TextField inputWatermark = null;
 	static ScrollBar red = null;
 	static ScrollBar green = null;
